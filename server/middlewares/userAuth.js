@@ -9,13 +9,14 @@ const userAuth=(req, res, next) => {
 
     try{
         const tokenDecoded=jwt.verify(token, process.env.JWT_SECRET);
-        if(tokenDecoded){
-            req.body.userId=tokenDecoded.id;
+        if(tokenDecoded.id){
+            req.userId=tokenDecoded.id;
         }else{
             return res.json({success:false, message:"Access denied. Login again."});
         }
         next();
     }catch(err){
+        console.log(err);
         res.json({success:false, message:"Invalid token."});
     }
 }

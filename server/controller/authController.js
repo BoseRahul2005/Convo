@@ -154,12 +154,76 @@ exports.verifyEmail=async (req, res) => {
             return res.json({success:false, message:"OTP expired"});
         }
         user.isAccountVerified=true;
-        
+
         //resetting the otp and expiry time to empty and 0 respectively after successful verification as it had as default values in the schema
         user.verifyOtp='';
         user.verifyOtpExpireAt=0;
         await user.save();
         res.json({success:true, message:"Email verified successfully"});
+    }catch(err){
+        res.json({success:false, message:err.message});
+    }
+}
+
+exports.isAuthenticated=async (req, res) => {
+    try{
+        res.json({success:true, message:"User is authenticated"});
+    }catch(err){
+        res.json({success:false, message:err.message});
+    }
+}
+
+exports.resetPassOtp=async (req, res) => {
+    let {email} = req.body;   
+    if(!email){
+        return res.json({success:false, message:"Email is required"});
+    }
+
+    try{
+        const user=await User.findOne({email});
+        if(!user){
+            return res.json({success:false, message:"User not found"});
+        }
+        let otp=Math.floor(100000 + Math.random() * 900000).toString(); //generating a random 6 digit value and converting it to string
+        user.resetOtp=otp; //setting the otp to the resetPassOtp field of the user object
+        user.resetOtpExpireAt=Date.now()+10*60*1000; //setting the expiry time of the otp to 10 minutes from now
+
+        let mailOption = {
+            from: process.env.SENDER_MAIL,
+            to: user.email,
+            subject: "Reset your password",
+            text: `Hello ${user.name},we are human and we can forget things\nDon't worry\nwe got you,\n\nYour password reset code is: ${otp}\n\nThis code will expire in 10 minutes.`
+        };
+        await transporter.sendMail(mailOption);
+        await user.save();
+        res.json({success:true, message:"OTP sent to your email successfully"});
+    }catch(err){
+        res.json({success:false, message:err.message});
+    }
+}
+exports.resetPassword=async (req, res) => {
+    let {email, otp, newPassword} = req.body;
+    if(!email || !otp || !newPassword){
+        return res.json({success:false, message:"All fields are required"});
+    }
+
+    try{
+        const user=await User.findOne({email});
+        if(!user){
+            return res.json({success:false, message:"User not found"});
+        }
+        if(user.resetOtp===''||user.resetOtp!==otp){
+            return res.json({success:false, message:"Invalid OTP"});
+        }
+        if(user.resetOtpExpireAt<Date.now()){
+            return res.json({success:false, message:"OTP expired"});
+        }
+        const hashedPassword=bcrypt.hashSync(newPassword, 10); //hashing the new password before saving it to the database
+        user.password=hashedPassword;
+        user.resetOtp='';
+        user.resetOtpExpireAt=0;
+        await user.save();
+        res.json({success:true, message:"Password reset successfully"});
     }catch(err){
         res.json({success:false, message:err.message});
     }
