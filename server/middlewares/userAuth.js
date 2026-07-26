@@ -1,0 +1,23 @@
+const jwt=require("jsonwebtoken");
+
+
+const userAuth=(req, res, next) => {
+    const {token}=req.cookies;
+    if(!token){
+        return res.json({success:false, message:"Access denied. Login again."});
+    }
+
+    try{
+        const tokenDecoded=jwt.verify(token, process.env.JWT_SECRET);
+        if(tokenDecoded){
+            req.body.userId=tokenDecoded.id;
+        }else{
+            return res.json({success:false, message:"Access denied. Login again."});
+        }
+        next();
+    }catch(err){
+        res.json({success:false, message:"Invalid token."});
+    }
+}
+
+module.exports=userAuth;
