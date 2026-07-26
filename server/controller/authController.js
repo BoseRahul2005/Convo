@@ -98,3 +98,69 @@ exports.logout=async (req, res) => {
         res.json({success:false, message:err.message});
     }
 }
+
+exports.sendVerifyOtp=async (req, res) => {
+    let { userId} = req.body;   
+    user=await User.findById(userId); //finding the user by id
+
+    //checking if the isAccountVerified is true or not, if it is true, we will return an error message
+    if(user.isAccountVerified){
+        return res.json({success:false, message:"Account is already verified"});
+    }
+
+    try{
+        let otp=Math.floor(100000 + Math.random() * 900000).toString(); //generating a random 6 digit value and converting it to string
+        user.verifyOtp=otp; //setting the otp to the verifyOtp field of the user object
+        user.verifyOtpExpireAt=Date.now()+10*60*1000; //setting the expiry time of the otp to 10 minutes from now
+
+        //sending the otp to the user's email using nodemailer
+        let mailOption = {
+            from: process.env.SENDER_MAIL,
+            to: user.email,
+            subject: "Verify your email",
+            text: `Hello ${user.name},\n\nYour verification code is: ${otp}\n\nThis code will expire in 10 minutes.`
+        };
+        await transporter.sendMail(mailOption);
+        await user.save();
+        res.json({success:true, message:"OTP sent successfully"});
+
+    }catch(err){
+        res.json({success:false, message:err.message});
+    }
+}
+
+exports.verifyEmail=async (req, res) => {
+    let { userId, otp } = req.body;   
+    user=await User.findById(userId);
+
+    if(!user||!otp){
+        return res.json({success:false, message:"Missing Details"});
+    }
+
+    try{
+        const user=await User.findById(userId);
+
+        if(!user){
+            return res.json({success:false, message:"User not found"});
+        }
+
+        //checking if the otp field is not empty and is correct or not, if it is not correct, we will return an error message
+        if(user.verifyOtp===''||user.verifyOtp!==otp){
+            return res.json({success:false, message:"Invalid OTP"});
+        }
+
+        //checking if the otp has expired or not, if it has expired, we will return an error message
+        if(user.verifyOtpExpireAt<Date.now()){
+            return res.json({success:false, message:"OTP expired"});
+        }
+        user.isAccountVerified=true;
+        
+        //resetting the otp and expiry time to empty and 0 respectively after successful verification as it had as default values in the schema
+        user.verifyOtp='';
+        user.verifyOtpExpireAt=0;
+        await user.save();
+        res.json({success:true, message:"Email verified successfully"});
+    }catch(err){
+        res.json({success:false, message:err.message});
+    }
+}
