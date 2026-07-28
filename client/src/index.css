@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+html,
+body,
+#root {
+	width: 100%;
+	min-height: 100%;
+}
+
+body {
+	margin: 0;
+}
+
+/* Prevent browser autofill/autocomplete white background on inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: #ffffff !important;
+	transition: background-color 500000s ease-in-out 0s;
+	box-shadow: 0 0 0px 1000px transparent inset !important;
+}
