@@ -2,9 +2,11 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import API from '../../api/axios.js'
 import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
 
 const Login = () => {
-    const [state, setState] = useState("login")
+    const [state, setState] = useState("login");
+    const navigate = useNavigate()
 
     const {
         register,
@@ -151,11 +153,13 @@ const Login = () => {
                         )}
                     </div>
 
-                    <div className="mt-4 text-left">
-                        <button type="button" className="text-sm text-indigo-400 hover:underline">
-                            Forget password?
-                        </button>
-                    </div>
+                    {state === "login" && (
+                        <div className="mt-4 text-left">
+                            <button type="button" onClick={() => navigate("/reset-password")} className="cursor-pointer text-sm text-indigo-400 hover:underline">
+                                Forget password?
+                            </button>
+                        </div>
+                    )}
 
                     <button type="submit" disabled={isSubmitting} className="mt-2 w-full h-11 rounded-full text-white bg-indigo-600 hover:bg-indigo-500 transition disabled:opacity-50 cursor-pointer">
                         {state === "login" ? "Login" : "Sign up"}
