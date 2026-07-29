@@ -42,19 +42,21 @@ const Register = () => {
 
     return (
         <>
-            <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-tr from-black via-indigo-950 to-fuchsia-950">
+            <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-tr from-black via-indigo-950 to-fuchsia-950 relative">
+                {/* Top Left Full Logo Header */}
+                <div className="absolute top-6 left-6 sm:top-1 sm:left-8 z-10 flex items-center cursor-pointer" onClick={() => navigate('/')}>
+                    <img
+                        src="/convo-fullLogo.svg"
+                        alt="Convo Logo"
+                        className="h-20 sm:h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(236,200,221,0.4)] transition-all hover:scale-105"
+                    />
+                </div>
+
                 <form
                     onSubmit={handleSubmit(onSubmit)}
                     noValidate
-                    className="w-full sm:w-87.5 text-center bg-white/6 border border-white/10 rounded-2xl px-8 py-4">
-                    <div className='flex justify-center items-center mt-1 -mb-6'>
-                        <img
-                            src="/convo-fullLogo.svg"
-                            alt="Convo Logo"
-                            className="w-28 h-28 sm:w-32 sm:h-32 object-contain drop-shadow-[0_0_25px_rgba(236,200,221,0.35)] transition-all"
-                        />
-                    </div>
-                    <h1 className="text-white text-3xl font-medium">
+                    className="w-full sm:w-87.5 text-center bg-white/6 border border-white/10 rounded-2xl px-8 py-6">
+                    <h1 className="text-white text-3xl mt-2 font-medium">
                         Sign up
                     </h1>
 

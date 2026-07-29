@@ -21,25 +21,25 @@ const Home = () => {
         document.body.style.cursor = 'col-resize'
     }
 
-    const userDetails = async ()=>{
-        try{
+    const userDetails = async () => {
+        try {
             const res = await API.get("/user/details");
-            if(res.data.success){
-                console.log("UserDetails",res.data);
+            if (res.data.success) {
+                console.log("UserDetails", res.data);
                 setUserData(res.data.userData);
             }
-            else{
+            else {
                 navigate("/");
             }
         }
-        catch(err){
+        catch (err) {
             console.log(err);
             navigate("/");
-        }finally{
-            setTimeout(()=>{
+        } finally {
+            setTimeout(() => {
 
                 setIsLoading(false);
-            },1500);
+            }, 1500);
         }
     }
 
@@ -86,8 +86,8 @@ const Home = () => {
             }
         }
     }, [])
-    
-     if (isLoading) {
+
+    if (isLoading) {
         return (
             <div className="h-screen w-full flex flex-col items-center justify-center gap-4 bg-gradient-to-tr from-black via-indigo-950 to-fuchsia-950">
                 <img
@@ -113,17 +113,15 @@ const Home = () => {
             {/* Left Sidebar Panel */}
             <div
                 style={{ width: `${sidebarWidth}px` }}
-                className={`bg-white/6 border border-white/10 rounded-2xl flex flex-col p-4 backdrop-blur-md relative shrink-0 shadow-2xl overflow-hidden ${
-                    isResizing ? 'transition-none select-none' : ''
-                }`}
+                className={`bg-white/6 border border-white/10 rounded-2xl flex flex-col p-4 backdrop-blur-md relative shrink-0 shadow-2xl overflow-hidden ${isResizing ? 'transition-none select-none' : ''
+                    }`}
             >
                 {/* Resizer Handle */}
                 <div
                     onMouseDown={startResizing}
                     title="Drag to resize sidebar"
-                    className={`absolute right-0 top-0 bottom-0 w-2 cursor-col-resize z-20 group transition-colors ${
-                        isResizing ? 'bg-indigo-500/80 w-3' : 'hover:bg-indigo-500/50'
-                    }`}
+                    className={`absolute right-0 top-0 bottom-0 w-2 cursor-col-resize z-20 group transition-colors ${isResizing ? 'bg-indigo-500/80 w-3' : 'hover:bg-indigo-500/50'
+                        }`}
                 >
                     {/* Visual grip indicator */}
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0.5 h-8 bg-white/40 rounded-full group-hover:bg-white/80 transition-colors" />

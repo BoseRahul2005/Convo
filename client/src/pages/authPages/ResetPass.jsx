@@ -65,7 +65,16 @@ const ResetPass = () => {
 
     return (
         <>
-            <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-tr from-black via-indigo-950 to-fuchsia-950">
+            <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-tr from-black via-indigo-950 to-fuchsia-950 relative">
+                {/* Top Left Full Logo Header */}
+                <div className="absolute top-6 left-6 sm:top-1 sm:left-8 z-10 flex items-center cursor-pointer" onClick={() => navigate('/')}>
+                    <img
+                        src="/convo-fullLogo.svg"
+                        alt="Convo Logo"
+                        className="h-20 sm:h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(236,200,221,0.4)] transition-all hover:scale-105"
+                    />
+                </div>
+
                 <form
                     onSubmit={handleSubmit(onSubmit)}
                     noValidate
