@@ -29,12 +29,12 @@ const Login = () => {
                 console.log("Login success:", res.data)
             } else {
                 toast.error(res.data.message || "Login failed");
-                reset({email:data.email,password:""});
+                reset({ email: data.email, password: "" });
                 console.error("Login error:", res.data.message)
             }
         } catch (err) {
             console.error("Network or Server error:", err);
-            reset({email:data.email,password:""});
+            reset({ email: data.email, password: "" });
             toast.error(err.response?.data?.message || err.message || "Something went wrong");
         }
     }
@@ -46,11 +46,18 @@ const Login = () => {
                     onSubmit={handleSubmit(onSubmit)}
                     noValidate
                     className="w-full sm:w-87.5 text-center bg-white/6 border border-white/10 rounded-2xl px-8 py-4">
-                    <h1 className="text-white text-3xl mt-6 font-medium">
+                    <div className='flex justify-center items-center mt-1 -mb-6'>
+                        <img
+                            src="/convo-fullLogo.svg"
+                            alt="Convo Logo"
+                            className="w-28 h-28 sm:w-32 sm:h-32 object-contain drop-shadow-[0_0_25px_rgba(236,200,221,0.35)] transition-all"
+                        />
+                    </div>
+                    <h1 className="text-white text-3xl font-medium">
                         Login
                     </h1>
 
-                    <p className="text-gray-400 text-sm mt-2">Please sign in to continue</p>
+                    <p className="text-gray-400 text-sm mt-2">C'mon everyone is waiting for you</p>
 
                     <div className="mt-6">
                         <div className="flex items-center w-full bg-white/5 ring-2 ring-white/10 focus-within:ring-indigo-500/60 h-12 rounded-full overflow-hidden pl-6 gap-2 transition-all">
