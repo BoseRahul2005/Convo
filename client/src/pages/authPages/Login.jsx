@@ -10,6 +10,7 @@ const Login = () => {
     const {
         register,
         handleSubmit,
+        reset,
         formState: { errors, isSubmitting }
     } = useForm({
         defaultValues: {
@@ -23,15 +24,18 @@ const Login = () => {
             const { email, password } = data;
             const res = await API.post("/auth/login", { email, password });
             if (res.data.success) {
-                toast.success(res.data.message || "Logged in successfully!")
+                toast.success(res.data.message || "Logged in successfully!");
+                navigate("/home");
                 console.log("Login success:", res.data)
             } else {
-                toast.error(res.data.message || "Login failed")
+                toast.error(res.data.message || "Login failed");
+                reset({email:data.email,password:""});
                 console.error("Login error:", res.data.message)
             }
         } catch (err) {
-            console.error("Network or Server error:", err)
-            toast.error(err.response?.data?.message || err.message || "Something went wrong")
+            console.error("Network or Server error:", err);
+            reset({email:data.email,password:""});
+            toast.error(err.response?.data?.message || err.message || "Something went wrong");
         }
     }
 

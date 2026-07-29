@@ -21,3 +21,10 @@ input:-webkit-autofill:active {
 	transition: background-color 500000s ease-in-out 0s;
 	box-shadow: 0 0 0px 1000px transparent inset !important;
 }
+
+/* zoomPulse animation for home page */
+
+@keyframes zoomPulse {
+    0%, 100% { transform: scale(0.9); opacity: 0.7; }
+    50% { transform: scale(1.1); opacity: 1; }
+}

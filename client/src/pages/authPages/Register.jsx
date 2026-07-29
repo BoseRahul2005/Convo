@@ -10,6 +10,7 @@ const Register = () => {
     const {
         register,
         handleSubmit,
+        reset,
         formState: { errors, isSubmitting }
     } = useForm({
         defaultValues: {
@@ -26,14 +27,16 @@ const Register = () => {
             if (res.data.success) {
                 toast.success(res.data.message || "Registered successfully!")
                 console.log("Register success:", res.data)
-                navigate("/")
+                navigate("/home");
             } else {
-                toast.error(res.data.message || "Registration failed")
+                toast.error(res.data.message || "Registration failed");
+                reset({name:data.name,username:data.username,email:data.email,password:""});
                 console.error("Register error:", res.data.message)
             }
         } catch (err) {
             console.error("Network or Server error:", err)
-            toast.error(err.response?.data?.message || err.message || "Something went wrong")
+            toast.error(err.response?.data?.message || err.message || "Something went wrong");
+            reset({name:data.name,username:data.username,email:data.email,password:""});
         }
     }
 
