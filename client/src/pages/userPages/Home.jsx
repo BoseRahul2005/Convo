@@ -15,7 +15,7 @@ const Home = () => {
     const [searchQuery, setSearchQuery] = useState('')
     const [isRequestsModalOpen, setIsRequestsModalOpen] = useState(false)
     const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false)
-    const [findUsernameQuery, setFindUsernameQuery] = useState('')
+    const [findUserQuery, setFindUserQuery] = useState('')
     const [requestTab, setRequestTab] = useState('incoming')
     const [incomingRequests, setIncomingRequests] = useState([])
     const [sentRequests, setSentRequests] = useState([])
@@ -24,7 +24,6 @@ const Home = () => {
         try {
             const res = await API.get("/user/details");
             if (res.data.success) {
-                console.log("UserDetails", res.data);
                 setUserData(res.data.userData);
             }
             else {
@@ -32,7 +31,6 @@ const Home = () => {
             }
         }
         catch (err) {
-            console.log(err);
             navigate("/");
         } finally {
             setTimeout(() => {
@@ -48,12 +46,10 @@ const Home = () => {
                 toast.success(res.data.message || "Logged out successfully!");
                 navigate("/");
             } else {
-                console.log(res);
                 toast.error(res.data.message || "Logout failed");
                 navigate("/home");
             }
         } catch (err) {
-            console.log(err);
             toast.error(err.response?.data?.message || err.message || "Something went wrong");
             navigate("/home");
         }
@@ -65,7 +61,7 @@ const Home = () => {
 
     const handleSendRequest = (username) => {
         toast.success(`Request sent to ${username}`);
-        setFindUsernameQuery('');
+        setFindUserQuery('');
         setIsAddContactModalOpen(false);
     }
 
@@ -108,9 +104,10 @@ const Home = () => {
             <AddContactModal
                 isOpen={isAddContactModalOpen}
                 onClose={() => setIsAddContactModalOpen(false)}
-                findUsernameQuery={findUsernameQuery}
-                setFindUsernameQuery={setFindUsernameQuery}
+                findUserQuery={findUserQuery}
+                setFindUserQuery={setFindUserQuery}
                 onSendRequest={handleSendRequest}
+                userData={userData}
             />
         </div>
     )
