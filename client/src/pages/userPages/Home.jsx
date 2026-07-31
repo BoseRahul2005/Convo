@@ -82,6 +82,7 @@ const Home = () => {
                 onSendRequest={(userId) => handleSendRequest(userId, setPendingRequests)}
                 userData={userData}
                 sentRequests={sentRequests}
+                incomingRequests={incomingRequests}
             />
         </div>
     )
