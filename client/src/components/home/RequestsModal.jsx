@@ -16,8 +16,16 @@ const RequestsModal = ({
         console.log('Accept request:', id)
     }
 
-    const handleReject = (id) => {
-        console.log('Reject request:', id)
+    const handleReject = async (id) => {
+        try {
+            const res = await API.delete(`/chat/request-reject/${id}`);
+            toast.success(res.data.message || "Request rejected successfully");
+            if (setPendingRequests) { //checking if this is sent as a prop from the home page
+                setPendingRequests(prev => prev.filter(req => req._id !== id)); //removing the rejected req from the list and storing the remaining reqs
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || err.message || "Failed to reject request");
+        }
     }
 
     //function to cancel the sent request

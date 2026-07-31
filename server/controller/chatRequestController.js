@@ -13,12 +13,13 @@ exports.sendRequest = async (req, res) => {
             return res.json({ success: false, message: "Cannot send a request to yourself" });
         }
 
+        //checking if request already exists or is accepted
         const existing = await ChatRequest.findOne({
             $or: [
                 { sender, receiver },
                 { sender: receiver, receiver: sender },
             ],
-            status: { $in: ["pending", "accepted"] }
+            status: { $in: ["pending", "accepted"] } //if the status of the document is pending or accepted
         });
 
         if (existing) {
@@ -61,6 +62,20 @@ exports.sentRequestsCancel=async(req,res)=>{
             return res.json({ success: false, message: "Chat request not found" });
         }
         res.json({ success: true, message: "Request cancelled successfully" });
+    } catch (err) {
+        console.log(err);
+        res.json({ success: false, message: err.message });
+    }
+}
+
+exports.requestReject=async(req,res)=>{
+    const {requestId}=req.params;
+    try {
+        const chatRequest = await ChatRequest.findByIdAndDelete(requestId);
+        if(!chatRequest){
+            return res.json({ success: false, message: "Chat request not found" });
+        }
+        res.json({ success: true, message: "Request rejected successfully" });
     } catch (err) {
         console.log(err);
         res.json({ success: false, message: err.message });

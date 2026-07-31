@@ -26,6 +26,13 @@ const Home = () => {
         fetchPendingRequests(setPendingRequests);
     }, []);
 
+    //everytime when the requests modal is opened, the fetchPendingRequests function will be called to fetch the pending requests
+    useEffect(() => {
+        if (isRequestsModalOpen) {
+            fetchPendingRequests(setPendingRequests);
+        }
+    }, [isRequestsModalOpen])
+
     //checks if the loggesd in user is the request reciever
     const incomingRequests = pendingRequests.filter(req => 
         (req.receiver?._id || req.receiver) === userData?._id
