@@ -28,19 +28,39 @@ exports.sendRequest = async (req, res) => {
         const chatRequest = new ChatRequest({ sender, receiver });
         await chatRequest.save();
         res.json({ success: true, message: "Chat request sent successfully" });
-        console.log(chatRequest);
     } catch (err) {
         console.log(err);
         res.json({ success: false, message: err.message });
     }
 }
 
-exports.recivePendingRequest = async (req, res) => {
+exports.pendingRequest = async (req, res) => {
+    const sender = req.userId;
     try {
-        const pendingRequests = await ChatRequest.find({status: "pending"})
-            .populate("sender", "username name _id email");
+        //This reads as: "find every pending request where either I'm the sender or I'm the receiver."
+        const pendingRequests = await ChatRequest.find({
+            status: "pending", //filter out by pending status
+            $or: [
+                { sender: sender }, //filters if the logged in user is sender or,
+                { receiver: sender } //filters if the logged in user is receiver
+            ]
+        })
+            .populate("sender receiver", "username name _id email");
         res.json({ success: true, pendingRequests });
-        console.log(pendingRequests);
+
+    } catch (err) {
+        console.log(err);
+        res.json({ success: false, message: err.message });
+    }
+}
+exports.sentRequestsCancel=async(req,res)=>{
+    const {requestId}=req.params;
+    try {
+        const chatRequest = await ChatRequest.findByIdAndDelete(requestId);
+        if(!chatRequest){
+            return res.json({ success: false, message: "Chat request not found" });
+        }
+        res.json({ success: true, message: "Request cancelled successfully" });
     } catch (err) {
         console.log(err);
         res.json({ success: false, message: err.message });
@@ -49,10 +69,9 @@ exports.recivePendingRequest = async (req, res) => {
 
 exports.reciveAcceptedRequest = async (req, res) => {
     try {
-        const acceptedRequests = await ChatRequest.find({status: "accepted"})
+        const acceptedRequests = await ChatRequest.find({ status: "accepted" })
             .populate("sender", "username name _id email");
         res.json({ success: true, acceptedRequests });
-        console.log(acceptedRequests);
     } catch (err) {
         console.log(err);
         res.json({ success: false, message: err.message });

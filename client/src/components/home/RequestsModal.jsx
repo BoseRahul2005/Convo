@@ -1,4 +1,7 @@
 import React from 'react'
+import RequestListItem from './RequestListItem'
+import API from '../../api/axios'
+import { toast } from 'react-toastify'
 
 const RequestsModal = ({
     isOpen,
@@ -6,8 +9,30 @@ const RequestsModal = ({
     requestTab,
     setRequestTab,
     incomingRequests = [],
-    sentRequests = []
+    sentRequests = [],
+    setPendingRequests
 }) => {
+    const handleAccept = (id) => {
+        console.log('Accept request:', id)
+    }
+
+    const handleReject = (id) => {
+        console.log('Reject request:', id)
+    }
+
+    //function to cancel the sent request
+    const handleCancel = async (id) => {
+        try {
+            const res = await API.delete(`/chat/sent-request-cancel/${id}`);
+            toast.success(res.data.message || "Request deleted successfully");
+            if (setPendingRequests) { //checking if this is sent as a prop from the home page
+                setPendingRequests(prev => prev.filter(req => req._id !== id)); //removing the cancelled req from the list and storing the remaining reqs
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || err.message || "Failed to delete request");
+        }
+    }
+
     if (!isOpen) return null
 
     return (
@@ -40,11 +65,10 @@ const RequestsModal = ({
                 <div className="bg-white/5 border border-white/10 p-1 rounded-xl flex gap-1 mt-5">
                     <button
                         onClick={() => setRequestTab('incoming')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all cursor-pointer ${
-                            requestTab === 'incoming'
-                                ? 'bg-white/15 text-white border border-white/10 shadow-sm'
-                                : 'text-gray-400 hover:text-white hover:bg-white/5'
-                        }`}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all cursor-pointer ${requestTab === 'incoming'
+                            ? 'bg-white/15 text-white border border-white/10 shadow-sm'
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                            }`}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" />
@@ -54,11 +78,10 @@ const RequestsModal = ({
                     </button>
                     <button
                         onClick={() => setRequestTab('sent')}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all cursor-pointer ${
-                            requestTab === 'sent'
-                                ? 'bg-white/15 text-white border border-white/10 shadow-sm'
-                                : 'text-gray-400 hover:text-white hover:bg-white/5'
-                        }`}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium transition-all cursor-pointer ${requestTab === 'sent'
+                            ? 'bg-white/15 text-white border border-white/10 shadow-sm'
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                            }`}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <line x1="22" y1="2" x2="11" y2="13" />
@@ -72,27 +95,44 @@ const RequestsModal = ({
                 <div className="min-h-[140px] flex flex-col items-center justify-center text-center p-6 mt-2">
                     {requestTab === 'incoming' ? (
                         incomingRequests.length > 0 ? (
-                            <div className="w-full flex flex-col gap-2">
-                                {incomingRequests.map((req, idx) => (
-                                    <div key={idx} className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/10">
-                                        <span className="text-sm font-medium">{req.username || req.email}</span>
-                                    </div>
-                                ))}
+                            <div className="w-full flex flex-col gap-2 max-h-60 overflow-y-auto pr-1">
+                                {incomingRequests.map((req, idx) => {
+                                    const person = req.sender || req
+                                    return (
+                                        <RequestListItem
+                                            key={req._id || idx}
+                                            person={person}
+                                            status="pending"
+                                            showActions={true}
+                                            onAccept={() => handleAccept(req._id)}
+                                            onReject={() => handleReject(req._id)}
+                                        />
+                                    )
+                                })}
                             </div>
                         ) : (
                             <p className="text-gray-400 text-sm">No pending requests.</p>
                         )
                     ) : (
+                        //if the sentRequests array has values, it will display the list of sent requests
                         sentRequests.length > 0 ? (
-                            <div className="w-full flex flex-col gap-2">
-                                {sentRequests.map((req, idx) => (
-                                    <div key={idx} className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/10">
-                                        <span className="text-sm font-medium">{req.username || req.email}</span>
-                                    </div>
-                                ))}
+                            <div className="w-full flex flex-col gap-2 max-h-60 overflow-y-auto pr-1">
+                                {sentRequests.map((req, idx) => {
+                                    const person = req.receiver || req
+                                    const status = req.status || 'pending'
+                                    return (
+                                        <RequestListItem
+                                            key={req._id}
+                                            person={person}
+                                            status={status}
+                                            showActions={false}
+                                            onCancel={() => handleCancel(req._id)}
+                                        />
+                                    )
+                                })}
                             </div>
                         ) : (
-                            <p className="text-gray-400 text-sm">No sent requests.</p>
+                            <p className="text-gray-400 text-sm font-medium">No requests sent yet!</p>
                         )
                     )}
                 </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import API from '../../api/axios'
 import { toast } from 'react-toastify'
+import { findUsers } from '../../api/requests'
+import UserSearchResultItem from './UserSearchResultItem'
 
 const AddContactModal = ({
     isOpen,
@@ -8,7 +9,8 @@ const AddContactModal = ({
     findUserQuery,
     setFindUserQuery,
     onSendRequest,
-    userData
+    userData,
+    sentRequests = [],
 }) => {
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -22,7 +24,7 @@ const AddContactModal = ({
         const search = setTimeout(async () => {
             setIsSearching(true)
             try {
-                const res = await API.post("/user/find-user", { query: findUserQuery });
+                const res = await findUsers(findUserQuery);
                 if (res.data.success) {
                     setSearchResults(res.data.users || []);
                 } else {
@@ -37,7 +39,7 @@ const AddContactModal = ({
         }, 300)
 
         return () => clearTimeout(search)
-    }, [findUserQuery])
+    }, [findUserQuery]);
 
     if (!isOpen) return null
 
@@ -92,43 +94,13 @@ const AddContactModal = ({
                             <p className="text-gray-400 text-xs text-center py-4">Searching...</p>
                         ) : searchResults.length > 0 ? (
                             searchResults.map((user) => (
-                                userData && user._id === userData._id ? (
-                                    <div key={user._id} className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/10 hover:bg-white/10 transition">
-                                        <div className="flex items-center gap-3 min-w-0">
-                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-md">
-                                                {(user.username || user.name || 'U').charAt(0).toUpperCase()}
-                                            </div>
-                                            <div className="min-w-0 flex-1">
-                                                <h4 className="text-sm font-medium truncate text-white leading-tight">{user.username}</h4>
-                                                {user.name && <p className="text-xs text-gray-400 truncate leading-tight">{user.name}</p>}
-                                            </div>
-                                        </div>
-                                        <button
-                                            className="bg-gray-700 text-white/70 text-xs font-medium px-3.5 py-1.5 rounded-lg shrink-0 shadow-sm cursor-not-allowed"
-                                            disabled
-                                        >
-                                            You
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div key={user._id} className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/10 hover:bg-white/10 transition">
-                                        <div className="flex items-center gap-3 min-w-0">
-                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-md">
-                                                {(user.username || user.name || 'U').charAt(0).toUpperCase()}
-                                            </div>
-                                            <div className="min-w-0 flex-1">
-                                                <h4 className="text-sm font-medium truncate text-white leading-tight">{user.username}</h4>
-                                                {user.name && <p className="text-xs text-gray-400 truncate leading-tight">{user.name}</p>}
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={() => onSendRequest ? onSendRequest(user.username) : null}
-                                            className="bg-pink-500 hover:bg-fuchsia-500 text-white text-xs font-medium px-3.5 py-1.5 rounded-lg transition cursor-pointer shrink-0 shadow-sm"
-                                        >
-                                            Send Request
-                                        </button>
-                                    </div>
-                                )
+                                <UserSearchResultItem
+                                    key={user._id}
+                                    user={user}
+                                    userData={userData}
+                                    sentRequests={sentRequests}
+                                    onSendRequest={onSendRequest}
+                                />
                             ))
                         ) : (
                             <p className="text-gray-400 text-xs text-center py-4">No users found.</p>

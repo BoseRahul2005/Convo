@@ -1,70 +1,42 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import API from '../../api/axios'
-import { toast } from 'react-toastify'
 import Loader from '../../components/home/Loader'
 import Sidebar from '../../components/home/Sidebar'
 import ChatArea from '../../components/home/ChatArea'
 import RequestsModal from '../../components/home/RequestsModal'
 import AddContactModal from '../../components/home/AddContactModal'
+import logout from '../../utils/logOutFunc'
+import fetchLoggedInUserDetails from '../../utils/loggedInUserDetails'
+import fetchPendingRequests from '../../utils/pendingRequests'
+import handleSendRequest from '../../utils/handleSendRequest'
 
 const Home = () => {
     const navigate = useNavigate()
-    const [isLoading, setIsLoading] = useState(true)
-    const [userData, setUserData] = useState(null)
-    const [searchQuery, setSearchQuery] = useState('')
-    const [isRequestsModalOpen, setIsRequestsModalOpen] = useState(false)
-    const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false)
-    const [findUserQuery, setFindUserQuery] = useState('')
-    const [requestTab, setRequestTab] = useState('incoming')
-    const [incomingRequests, setIncomingRequests] = useState([])
-    const [sentRequests, setSentRequests] = useState([])
-
-    const userDetails = async () => {
-        try {
-            const res = await API.get("/user/details");
-            if (res.data.success) {
-                setUserData(res.data.userData);
-            }
-            else {
-                navigate("/");
-            }
-        }
-        catch (err) {
-            navigate("/");
-        } finally {
-            setTimeout(() => {
-                setIsLoading(false);
-            }, 1500);
-        }
-    }
-
-    const logout = async () => {
-        try {
-            const res = await API.post("/auth/logout");
-            if (res.data.success) {
-                toast.success(res.data.message || "Logged out successfully!");
-                navigate("/");
-            } else {
-                toast.error(res.data.message || "Logout failed");
-                navigate("/home");
-            }
-        } catch (err) {
-            toast.error(err.response?.data?.message || err.message || "Something went wrong");
-            navigate("/home");
-        }
-    }
+    const [isLoading, setIsLoading] = useState(true);//for the loading spinner
+    const [userData, setUserData] = useState(null);//for the logged in user data
+    const [searchQuery, setSearchQuery] = useState('');//for the search
+    const [isRequestsModalOpen, setIsRequestsModalOpen] = useState(false);//for the requests modal
+    const [isAddContactModalOpen, setIsAddContactModalOpen] = useState(false);//for the add contact modal
+    const [findUserQuery, setFindUserQuery] = useState('');//for the find user query
+    const [requestTab, setRequestTab] = useState('incoming');//for the request tab
+    const [pendingRequests, setPendingRequests] = useState([]);
 
     useEffect(() => {
-        userDetails();
+        fetchLoggedInUserDetails(setUserData, setIsLoading, navigate);
+        fetchPendingRequests(setPendingRequests);
     }, []);
 
-    const handleSendRequest = (username) => {
-        toast.success(`Request sent to ${username}`);
-        setFindUserQuery('');
-        setIsAddContactModalOpen(false);
-    }
+    //checks if the loggesd in user is the request reciever
+    const incomingRequests = pendingRequests.filter(req => 
+        (req.receiver?._id || req.receiver) === userData?._id
+    );
 
+    //checks if the loggesd in user is the request sender
+    const sentRequests = pendingRequests.filter(req => 
+        (req.sender?._id || req.sender) === userData?._id
+    );
+
+    //Ater login when user enters the home page it will show a loader page, until isLoading is true, after 1.5 seconds it's value will become false and the home page will be visible
     if (isLoading) {
         return <Loader />
     }
@@ -80,7 +52,7 @@ const Home = () => {
             {/* Left Sidebar Panel */}
             <Sidebar
                 userData={userData}
-                onLogout={logout}
+                onLogout={() => logout(navigate)}
                 onOpenRequests={() => setIsRequestsModalOpen(true)}
                 onOpenAddContact={() => setIsAddContactModalOpen(true)}
                 searchQuery={searchQuery}
@@ -98,6 +70,7 @@ const Home = () => {
                 setRequestTab={setRequestTab}
                 incomingRequests={incomingRequests}
                 sentRequests={sentRequests}
+                setPendingRequests={setPendingRequests}
             />
 
             {/* Find Users / Add Contact Modal Card */}
@@ -106,8 +79,9 @@ const Home = () => {
                 onClose={() => setIsAddContactModalOpen(false)}
                 findUserQuery={findUserQuery}
                 setFindUserQuery={setFindUserQuery}
-                onSendRequest={handleSendRequest}
+                onSendRequest={(userId) => handleSendRequest(userId, setPendingRequests)}
                 userData={userData}
+                sentRequests={sentRequests}
             />
         </div>
     )
