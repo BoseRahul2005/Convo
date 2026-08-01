@@ -25,3 +25,10 @@ export const isRequestReceived = (incomingRequests = [], userId) => {
         req?.sender?._id === userId
     );
 };
+
+export const isContact = (contacts = [], userId) => {
+    if (!userId || !Array.isArray(contacts)) return false;
+    return contacts.some(contact =>
+        contact.contactId === userId
+    );
+};

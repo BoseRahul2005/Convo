@@ -30,10 +30,10 @@ exports.sendRequest = async (req, res) => {
         const chatRequest = new ChatRequest({ sender, receiver });
         await chatRequest.save();
 
-        const receiverSocketId=getSocketIdByUserId(chatRequest.receiver);
-        if(receiverSocketId){
+        const receiverSocketId = getSocketIdByUserId(chatRequest.receiver);
+        if (receiverSocketId) {
             getIO().to(receiverSocketId).emit("chat_request_sent");
-        }   
+        }
         res.json({ success: true, message: "Chat request sent successfully", chatRequest });
     } catch (err) {
         console.log(err);
@@ -60,16 +60,16 @@ exports.pendingRequest = async (req, res) => {
         res.json({ success: false, message: err.message });
     }
 }
-exports.sentRequestsCancel=async(req,res)=>{
-    const {requestId}=req.params;
+exports.sentRequestsCancel = async (req, res) => {
+    const { requestId } = req.params;
     try {
         const chatRequest = await ChatRequest.findByIdAndDelete(requestId);
-        if(!chatRequest){
+        if (!chatRequest) {
             return res.json({ success: false, message: "Chat request not found" });
         }
 
-        const receiverSocketId=getSocketIdByUserId(chatRequest.receiver._id);
-        if(receiverSocketId){
+        const receiverSocketId = getSocketIdByUserId(chatRequest.receiver._id);
+        if (receiverSocketId) {
             getIO().to(receiverSocketId).emit("chat_request_deleted");
         }
         res.json({ success: true, message: "Request cancelled successfully" });
@@ -79,21 +79,21 @@ exports.sentRequestsCancel=async(req,res)=>{
     }
 }
 
-exports.requestReject=async(req,res)=>{
-    const loggedInUser=req.userId;
-    const {requestId}=req.params;
+exports.requestReject = async (req, res) => {
+    const loggedInUser = req.userId;
+    const { requestId } = req.params;
     try {
         //firstly check if the request is sent to the logged in user
         const chatRequest = await ChatRequest.findOne({ _id: requestId, receiver: loggedInUser });
-        if(!chatRequest){
+        if (!chatRequest) {
             return res.json({ success: false, message: "Chat request not found" });
         }
 
         await chatRequest.deleteOne();
-        
+
         // stores the socket id of the sender
-        const senderSocketId=getSocketIdByUserId(chatRequest.sender);
-        if(senderSocketId){
+        const senderSocketId = getSocketIdByUserId(chatRequest.sender);
+        if (senderSocketId) {
             getIO().to(senderSocketId).emit("chat_request_rejected");
         }
         res.json({ success: true, message: "Request rejected successfully" });
@@ -103,14 +103,58 @@ exports.requestReject=async(req,res)=>{
     }
 }
 
-exports.reciveAcceptedRequest = async (req, res) => {
+exports.acceptRequest = async (req, res) => {
+    const loggedInUser = req.userId;
+    const { requestId } = req.params;
     try {
-        const acceptedRequests = await ChatRequest.find({ status: "accepted" })
-            .populate("sender", "username name _id email");
-        res.json({ success: true, acceptedRequests });
+        const chatRequest = await ChatRequest.findOneAndUpdate({ _id: requestId, receiver: loggedInUser },
+            { $set: { status: "accepted" } },
+            { new: true } //returns the updated document
+        )
+
+        if (!chatRequest) {
+            return res.json({ success: false, message: "Chat request not found" });
+        }
+
+        const senderSocketId = getSocketIdByUserId(chatRequest.sender._id);
+        if (senderSocketId) {
+            getIO().to(senderSocketId).emit("chat_request_accepted");
+        }
+        res.json({ success: true, message: "Request accepted" });
     } catch (err) {
         console.log(err);
         res.json({ success: false, message: err.message });
     }
 }
 
+exports.getContacts = async (req, res) => {
+    const loggedInUser = req.userId;
+    try {
+        const acceptedRequest = await ChatRequest.find({
+            status: "accepted",
+            $or: [
+                { sender: loggedInUser },
+                { receiver: loggedInUser }
+            ]
+        }).populate("sender receiver", "username name _id email");
+
+        const contacts = acceptedRequest.map(request => {
+            const isSender = request.sender._id.toString() === loggedInUser;
+            const otherUser = isSender ? request.receiver : request.sender;
+
+            return {
+                _id: request._id,
+                contactId: otherUser._id,
+                name: otherUser.name,
+                username: otherUser.username,
+                email: otherUser.email
+            };
+        })
+
+        res.json({ success: true, contacts });
+    }
+    catch (err) {
+        console.log(err);
+        res.json({ success: false, message: err.message });
+    }
+} 

@@ -11,7 +11,8 @@ const AddContactModal = ({
     onSendRequest,
     userData,
     sentRequests = [],
-    incomingRequests = []
+    incomingRequests = [],
+    contacts=[]
 }) => {
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -102,6 +103,7 @@ const AddContactModal = ({
                                     sentRequests={sentRequests}
                                     incomingRequests={incomingRequests}
                                     onSendRequest={onSendRequest}
+                                    contacts={contacts}
                                 />
                             ))
                         ) : (

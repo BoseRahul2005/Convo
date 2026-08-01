@@ -12,8 +12,16 @@ const RequestsModal = ({
     sentRequests = [],
     setPendingRequests
 }) => {
-    const handleAccept = (id) => {
-        console.log('Accept request:', id)
+    const handleAccept = async (id) => {
+        try {
+            const res = await API.post(`/chat/accept-request/${id}`);
+            toast.success(res.data.message || "Request accepted successfully");
+            if (setPendingRequests) { //checking if this is sent as a prop from the home page
+                setPendingRequests(prev => prev.filter(req => req._id !== id)); //removing the accepted req from the list and storing the remaining reqs
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || err.message || "Failed to accept request");
+        }
     }
 
     const handleReject = async (id) => {

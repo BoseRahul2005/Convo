@@ -9,6 +9,7 @@ import logout from '../../utils/logOutFunc'
 import fetchLoggedInUserDetails from '../../utils/loggedInUserDetails'
 import fetchPendingRequests from '../../utils/pendingRequests'
 import handleSendRequest from '../../utils/handleSendRequest'
+import fetchContacts from '../../utils/fetchContacts'
 
 const Home = () => {
     const navigate = useNavigate()
@@ -22,6 +23,7 @@ const Home = () => {
     const [pendingRequests, setPendingRequests] = useState([]);
     const socketRef = useRef(null)//for the socket connection
     const [socket, setSocket] = useState(null);
+    const [contacts, setContacts] = useState([]);
 
     useEffect(() => {
         if (!socket) return;
@@ -36,6 +38,11 @@ const Home = () => {
         socket.on("chat_request_rejected", () => {
             fetchPendingRequests(setPendingRequests);
         });
+
+        socket.on("chat_request_accepted", () => {
+            fetchPendingRequests(setPendingRequests);
+            fetchContacts(setContacts);
+        })
 
         return () => {
             socket.off("chat_request_sent");
@@ -55,6 +62,7 @@ const Home = () => {
             }
         );
         fetchPendingRequests(setPendingRequests);
+        fetchContacts(setContacts);
     }, []);
 
     //everytime when the requests modal is opened, the fetchPendingRequests function will be called to fetch the pending requests
@@ -90,6 +98,7 @@ const Home = () => {
             {/* Left Sidebar Panel */}
             <Sidebar
                 userData={userData}
+                contacts={contacts}
                 onLogout={() => logout(navigate)}
                 onOpenRequests={() => setIsRequestsModalOpen(true)}
                 onOpenAddContact={() => setIsAddContactModalOpen(true)}
@@ -121,6 +130,7 @@ const Home = () => {
                 userData={userData}
                 sentRequests={sentRequests}
                 incomingRequests={incomingRequests}
+                contacts={contacts}
             />
         </div>
     )
