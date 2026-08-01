@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect,useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Loader from '../../components/home/Loader'
 import Sidebar from '../../components/home/Sidebar'
@@ -20,9 +20,16 @@ const Home = () => {
     const [findUserQuery, setFindUserQuery] = useState('');//for the find user query
     const [requestTab, setRequestTab] = useState('incoming');//for the request tab
     const [pendingRequests, setPendingRequests] = useState([]);
+    const socketRef = useRef(null)//for the socket connection
 
     useEffect(() => {
-        fetchLoggedInUserDetails(setUserData, setIsLoading, navigate);
+        fetchLoggedInUserDetails(setUserData,
+             setIsLoading,
+              navigate,
+            (socket)=>{
+                socketRef.current = socket;
+            }
+            );
         fetchPendingRequests(setPendingRequests);
     }, []);
 
