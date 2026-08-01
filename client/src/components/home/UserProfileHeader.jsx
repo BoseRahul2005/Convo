@@ -15,7 +15,7 @@ const UserProfileHeader = ({ userData, onLogout }) => {
                     {userData && (
                         <>
                             <h2 className="text-white text-sm font-semibold truncate leading-tight">{userData.username}</h2>
-                            <p className="text-gray-400 text-xs truncate leading-tight">{userData.email}</p>
+                            <p className="text-gray-400 text-xs truncate leading-tight">{userData.name}</p>
                         </>
                     )}
                 </div>
