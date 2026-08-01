@@ -40,8 +40,8 @@ const initSocket = (server) => {
     return io;
 };
 
-const getLoggedInUserSocketId = (userId) => userSocketMap[userId]; //gives you the socket id value of the logged in user using their user id as a key
+const getSocketIdByUserId = (userId) => userSocketMap[userId]; //gives you the socket id value of the logged in user using their user id as a key
 
 const getIO = () => io;
 
-module.exports = { initSocket, getLoggedInUserSocketId, getIO };
+module.exports = { initSocket, getSocketIdByUserId, getIO };

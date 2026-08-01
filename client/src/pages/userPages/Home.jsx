@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Loader from '../../components/home/Loader'
 import Sidebar from '../../components/home/Sidebar'
@@ -21,15 +21,39 @@ const Home = () => {
     const [requestTab, setRequestTab] = useState('incoming');//for the request tab
     const [pendingRequests, setPendingRequests] = useState([]);
     const socketRef = useRef(null)//for the socket connection
+    const [socket, setSocket] = useState(null);
 
     useEffect(() => {
-        fetchLoggedInUserDetails(setUserData,
-             setIsLoading,
-              navigate,
-            (socket)=>{
-                socketRef.current = socket;
+        if (!socket) return;
+
+        socket.on("chat_request_sent", () => {
+            fetchPendingRequests(setPendingRequests);
+        });
+        socket.on("chat_request_deleted", () => {
+            fetchPendingRequests(setPendingRequests);
+        });
+
+        socket.on("chat_request_rejected", () => {
+            fetchPendingRequests(setPendingRequests);
+        });
+
+        return () => {
+            socket.off("chat_request_sent");
+            socket.off("chat_request_deleted");
+            socket.off("chat_request_rejected");
+        }
+    }, [socket]);
+
+    useEffect(() => {
+        fetchLoggedInUserDetails(
+            setUserData,
+            setIsLoading,
+            navigate,
+            (sock) => {
+                socketRef.current = sock;
+                setSocket(sock);
             }
-            );
+        );
         fetchPendingRequests(setPendingRequests);
     }, []);
 
@@ -41,12 +65,12 @@ const Home = () => {
     }, [isRequestsModalOpen])
 
     //checks if the loggesd in user is the request reciever
-    const incomingRequests = pendingRequests.filter(req => 
+    const incomingRequests = pendingRequests.filter(req =>
         (req.receiver?._id || req.receiver) === userData?._id
     );
 
     //checks if the loggesd in user is the request sender
-    const sentRequests = pendingRequests.filter(req => 
+    const sentRequests = pendingRequests.filter(req =>
         (req.sender?._id || req.sender) === userData?._id
     );
 

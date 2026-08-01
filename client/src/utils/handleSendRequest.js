@@ -1,5 +1,4 @@
 import API from "../api/axios";
-import fetchPendingRequests from "./pendingRequests";
 import { toast } from "react-toastify";
 
 const handleSendRequest = async (userId, setPendingRequests) => {
@@ -8,8 +7,8 @@ const handleSendRequest = async (userId, setPendingRequests) => {
             console.log("Send Request API response:", res.data);
             if (res.data.success) {
                 toast.success(res.data.message || "Request sent successfully");
-                if (setPendingRequests) {
-                    fetchPendingRequests(setPendingRequests);
+                if (setPendingRequests && res.data.chatRequest) {
+                    setPendingRequests(prev => [...prev, res.data.chatRequest]);
                 }
             }
         } catch (err) {

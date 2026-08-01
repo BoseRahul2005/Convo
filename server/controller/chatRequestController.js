@@ -1,4 +1,5 @@
 const ChatRequest = require("../models/chatRequestModel.js");
+const { getSocketIdByUserId, getIO } = require("../config/socket.js")
 
 exports.sendRequest = async (req, res) => {
     const sender = req.userId;
@@ -28,7 +29,12 @@ exports.sendRequest = async (req, res) => {
 
         const chatRequest = new ChatRequest({ sender, receiver });
         await chatRequest.save();
-        res.json({ success: true, message: "Chat request sent successfully" });
+
+        const receiverSocketId=getSocketIdByUserId(chatRequest.receiver);
+        if(receiverSocketId){
+            getIO().to(receiverSocketId).emit("chat_request_sent");
+        }   
+        res.json({ success: true, message: "Chat request sent successfully", chatRequest });
     } catch (err) {
         console.log(err);
         res.json({ success: false, message: err.message });
@@ -61,6 +67,11 @@ exports.sentRequestsCancel=async(req,res)=>{
         if(!chatRequest){
             return res.json({ success: false, message: "Chat request not found" });
         }
+
+        const receiverSocketId=getSocketIdByUserId(chatRequest.receiver._id);
+        if(receiverSocketId){
+            getIO().to(receiverSocketId).emit("chat_request_deleted");
+        }
         res.json({ success: true, message: "Request cancelled successfully" });
     } catch (err) {
         console.log(err);
@@ -69,11 +80,21 @@ exports.sentRequestsCancel=async(req,res)=>{
 }
 
 exports.requestReject=async(req,res)=>{
+    const loggedInUser=req.userId;
     const {requestId}=req.params;
     try {
-        const chatRequest = await ChatRequest.findByIdAndDelete(requestId);
+        //firstly check if the request is sent to the logged in user
+        const chatRequest = await ChatRequest.findOne({ _id: requestId, receiver: loggedInUser });
         if(!chatRequest){
             return res.json({ success: false, message: "Chat request not found" });
+        }
+
+        await chatRequest.deleteOne();
+        
+        // stores the socket id of the sender
+        const senderSocketId=getSocketIdByUserId(chatRequest.sender);
+        if(senderSocketId){
+            getIO().to(senderSocketId).emit("chat_request_rejected");
         }
         res.json({ success: true, message: "Request rejected successfully" });
     } catch (err) {
