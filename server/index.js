@@ -8,6 +8,7 @@ const connectDB = require("./config/mongodb.js");
 const router = require("./routes/authRoutes.js");
 const userRouter = require("./routes/userRoutes.js");
 const chatRouter = require("./routes/chatRoutes.js");
+const messageRouter = require("./routes/messageRoutes.js");
 const { initSocket } = require("./config/socket.js");
 
 const app = express();
@@ -31,6 +32,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", router);
 app.use("/api/user", userRouter);
 app.use("/api/chat", chatRouter);
+app.use("/api/msg",messageRouter)
 
 // Wrap the Express app in a raw HTTP server
 const server = http.createServer(app);

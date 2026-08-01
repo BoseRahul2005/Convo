@@ -24,6 +24,7 @@ const Home = () => {
     const socketRef = useRef(null)//for the socket connection
     const [socket, setSocket] = useState(null);
     const [contacts, setContacts] = useState([]);
+    const [selectedContact, setSelectedContact] = useState(null);
 
     useEffect(() => {
         if (!socket) return;
@@ -99,6 +100,8 @@ const Home = () => {
             <Sidebar
                 userData={userData}
                 contacts={contacts}
+                selectedContact={selectedContact}
+                onSelectContact={setSelectedContact}
                 onLogout={() => logout(navigate)}
                 onOpenRequests={() => setIsRequestsModalOpen(true)}
                 onOpenAddContact={() => setIsAddContactModalOpen(true)}
@@ -107,7 +110,11 @@ const Home = () => {
             />
 
             {/* Main Chat Area */}
-            <ChatArea />
+            <ChatArea 
+            selectedContact={selectedContact} 
+            userData={userData} 
+            socket={socket}
+            />
 
             {/* Chat Requests Modal Card */}
             <RequestsModal

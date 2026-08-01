@@ -4,6 +4,8 @@ import UserProfileHeader from './UserProfileHeader'
 const Sidebar = ({
     userData,
     contacts=[],
+    selectedContact,
+    onSelectContact,
     onLogout,
     onOpenRequests,
     onOpenAddContact,
@@ -132,20 +134,28 @@ const Sidebar = ({
             {/* Contacts List Area */}
             <div className="flex-1 mt-4 overflow-y-auto flex flex-col gap-1.5">
             {contacts.length > 0 ? (
-                contacts.map((contact) => (
-                    <button
-                        key={contact._id}
-                        className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/10 transition text-left cursor-pointer"
-                    >
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white text-sm font-bold flex items-center justify-center shrink-0 shadow-md">
-                            {(contact.username || contact.name || 'U').charAt(0).toUpperCase()}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                            <h4 className="text-sm font-semibold text-white truncate leading-tight">{contact.username}</h4>
-                            <p className="text-xs text-gray-400 truncate leading-tight mt-0.5">No messages yet</p>
-                        </div>
-                    </button>
-                ))
+                contacts.map((contact) => {
+                    const isSelected = selectedContact?.contactId === contact.contactId || (selectedContact?._id && selectedContact?._id === contact._id) || (selectedContact?.contactId && selectedContact?.contactId === contact._id) || (contact.contactId && selectedContact?._id === contact.contactId);
+                    return (
+                        <button
+                            key={contact._id || contact.contactId}
+                            onClick={() => onSelectContact && onSelectContact(contact)}
+                            className={`w-full flex items-center gap-3 p-2.5 rounded-xl transition text-left cursor-pointer ${
+                                isSelected
+                                    ? 'bg-fuchsia-500/15 border border-fuchsia-500/20'
+                                    : 'bg-transparent border border-transparent hover:bg-white/10'
+                            }`}
+                        >
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white text-sm font-bold flex items-center justify-center shrink-0 shadow-md">
+                                {(contact.username || contact.name || 'U').charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <h4 className="text-sm font-semibold text-white truncate leading-tight">{contact.username}</h4>
+                                <p className="text-xs text-gray-400 truncate leading-tight mt-0.5">No messages yet</p>
+                            </div>
+                        </button>
+                    )
+                })
             ) : (
                 <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
                     <p className="text-gray-400 text-sm">No contacts yet.</p>
