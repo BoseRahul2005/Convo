@@ -89,7 +89,7 @@ const Home = () => {
     }
 
     return (
-        <div className="h-screen w-full flex bg-gradient-to-tr from-black via-indigo-950 to-fuchsia-950 text-white relative overflow-hidden p-3 sm:p-4 gap-3 sm:gap-4 box-border">
+        <div className="h-dvh w-full flex bg-gradient-to-tr from-black via-indigo-950 to-fuchsia-950 text-white relative overflow-hidden p-3 sm:p-4 gap-3 sm:gap-4 box-border">
             {/* Soft Ambient Backdrop */}
             <div className="fixed inset-0 -z-10 pointer-events-none">
                 <div className="absolute left-1/2 top-20 -translate-x-1/2 w-245 h-115 bg-gradient-to-tr from-indigo-800/35 to-transparent rounded-full blur-3xl" />

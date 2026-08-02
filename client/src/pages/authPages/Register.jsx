@@ -49,7 +49,7 @@ const Register = () => {
 
     return (
         <>
-            <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-tr from-black via-indigo-950 to-fuchsia-950 relative p-4">
+            <div className="min-h-dvh w-full flex items-center justify-center bg-gradient-to-tr from-black via-indigo-950 to-fuchsia-950 relative p-4">
                 {/* Top Left Full Logo Header */}
                 <div className="absolute top-2 left-4 sm:top-1 sm:left-8 z-10 flex items-center cursor-pointer" onClick={() => navigate('/')}>
                     <img

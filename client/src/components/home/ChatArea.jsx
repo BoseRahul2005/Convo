@@ -113,7 +113,7 @@ const ChatArea = ({ selectedContact, userData, socket, onMessageActivity, onBack
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 p-4 overflow-y-auto no-scrollbar [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex-1 min-h-0 p-4 overflow-y-auto no-scrollbar [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {messages.length > 0 ? (
                     <div className="flex flex-col justify-end min-h-full gap-2">
                         {messages.map((message, index) => {
@@ -167,7 +167,7 @@ const ChatArea = ({ selectedContact, userData, socket, onMessageActivity, onBack
             </div>
 
             {/* Message Input Bar */}
-            <div className="p-4 border-t border-white/10 shrink-0">
+            <div className="p-4 pb-[env(safe-area-inset-bottom)] border-t border-white/10 shrink-0">
                 <div className="flex items-center w-full bg-white/5 ring-2 ring-white/10 focus-within:ring-indigo-500/60 h-12 rounded-full px-4 gap-2 transition-all">
                     <input
                         type="text"
