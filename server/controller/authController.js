@@ -188,7 +188,7 @@ exports.resetPassOtp=async (req, res) => {
         let otp=Math.floor(100000 + Math.random() * 900000).toString(); //generating a random 6 digit value and converting it to string
         user.resetOtp=otp; //setting the otp to the resetPassOtp field of the user object
         user.resetOtpExpireAt=Date.now()+10*60*1000; //setting the expiry time of the otp to 10 minutes from now
-
+        
         let mailOption = {
             from: process.env.SENDER_MAIL,
             to: user.email,
