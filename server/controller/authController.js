@@ -1,7 +1,18 @@
 const User=require("../models/userModel");
 const bcrypt=require("bcryptjs");
 const jwt=require("jsonwebtoken");
-const resend=require("../config/nodemailer.js"); // now exports the Resend client instead of a Nodemailer transporter
+const brevoApi=require("../config/nodemailer.js");
+const brevo=require("@getbrevo/brevo");
+
+// small helper so we don't repeat this shape in every function
+const sendEmail = async ({ to, subject, text }) => {
+    const email = new brevo.SendSmtpEmail();
+    email.sender = { name: "Convo", email: process.env.SENDER_MAIL };
+    email.to = [{ email: to }];
+    email.subject = subject;
+    email.textContent = text;
+    return brevoApi.sendTransacEmail(email);
+}
 
 //for registering a new user
 exports.register=async (req, res) => {
@@ -37,8 +48,7 @@ exports.register=async (req, res) => {
         res.json({success:true, message:"Registered successfully"});
 
         // Send welcome email in the background
-        resend.emails.send({
-            from: `Convo <${process.env.SENDER_MAIL}>`,
+        sendEmail({
             to: newUser.email,
             subject: "Welcome to Convo!",
             text: `Hello ${newUser.name},\n\nThank you for registering with us! We're excited to have you on board.\n\nWake up your Beast in the chat..`
@@ -109,8 +119,7 @@ exports.sendVerifyOtp=async (req, res) => {
         user.verifyOtp=otp;
         user.verifyOtpExpireAt=Date.now()+10*60*1000;
 
-        await resend.emails.send({
-            from: `Convo <${process.env.SENDER_MAIL}>`,
+        await sendEmail({
             to: user.email,
             subject: "Verify your email",
             text: `Hello ${user.name},\n\nYour verification code is: ${otp}\n\nThis code will expire in 10 minutes.`
@@ -179,8 +188,7 @@ exports.resetPassOtp=async (req, res) => {
         user.resetOtp=otp;
         user.resetOtpExpireAt=Date.now()+10*60*1000;
         
-        await resend.emails.send({
-            from: `Convo <${process.env.SENDER_MAIL}>`,
+        await sendEmail({
             to: user.email,
             subject: "Reset your password",
             text: `Hello ${user.name},we are human and we can forget things\nDon't worry\nwe got you,\n\nYour password reset code is: ${otp}\n\nThis code will expire in 10 minutes.`
