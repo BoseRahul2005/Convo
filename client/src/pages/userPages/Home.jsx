@@ -127,6 +127,7 @@ const Home = () => {
                 incomingRequests={incomingRequests}
                 sentRequests={sentRequests}
                 setPendingRequests={setPendingRequests}
+                onContactsChange={() => fetchContacts(setContacts)}
             />
 
             {/* Find Users / Add Contact Modal Card */}

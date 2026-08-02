@@ -10,7 +10,8 @@ const RequestsModal = ({
     setRequestTab,
     incomingRequests = [],
     sentRequests = [],
-    setPendingRequests
+    setPendingRequests,
+    onContactsChange
 }) => {
     const handleAccept = async (id) => {
         try {
@@ -18,6 +19,9 @@ const RequestsModal = ({
             toast.success(res.data.message || "Request accepted successfully");
             if (setPendingRequests) { //checking if this is sent as a prop from the home page
                 setPendingRequests(prev => prev.filter(req => req._id !== id)); //removing the accepted req from the list and storing the remaining reqs
+            }
+            if (onContactsChange) {
+                onContactsChange();
             }
         } catch (err) {
             toast.error(err.response?.data?.message || err.message || "Failed to accept request");
