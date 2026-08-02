@@ -1,17 +1,16 @@
 const User=require("../models/userModel");
 const bcrypt=require("bcryptjs");
 const jwt=require("jsonwebtoken");
-const brevoApi=require("../config/nodemailer.js");
-const brevo=require("@getbrevo/brevo");
+const brevo = require("../config/nodemailer.js");
 
 // small helper so we don't repeat this shape in every function
 const sendEmail = async ({ to, subject, text }) => {
-    const email = new brevo.SendSmtpEmail();
-    email.sender = { name: "Convo", email: process.env.SENDER_MAIL };
-    email.to = [{ email: to }];
-    email.subject = subject;
-    email.textContent = text;
-    return brevoApi.sendTransacEmail(email);
+    return brevo.transactionalEmails.sendTransacEmail({
+        sender: { name: "Convo", email: process.env.SENDER_MAIL },
+        to: [{ email: to }],
+        subject: subject,
+        textContent: text
+    });
 }
 
 //for registering a new user
