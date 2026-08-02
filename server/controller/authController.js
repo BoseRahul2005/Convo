@@ -38,6 +38,7 @@ exports.register=async (req, res) => {
             maxAge:7*24*60*60*1000, // 7 days
         });
 
+        res.json({success:true, message:"Registered successfully"});
         // Send welcome email
         const mailOptions = {
             from: process.env.SENDER_MAIL,
@@ -47,7 +48,6 @@ exports.register=async (req, res) => {
         };
         await transporter.sendMail(mailOptions);
 
-        res.json({success:true, message:"Registered successfully"});
 
     }catch(err){
         res.json({success:false, message:err.message});
