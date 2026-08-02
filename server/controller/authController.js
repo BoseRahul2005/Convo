@@ -55,6 +55,7 @@ exports.register=async (req, res) => {
 }
 
 exports.login=async (req, res) => {
+    console.log("NODE_ENV is:", process.env.NODE_ENV);
     const { email, password } = req.body;
     if(!email || !password){
         return res.json({success:false, message:"All fields are required"});
