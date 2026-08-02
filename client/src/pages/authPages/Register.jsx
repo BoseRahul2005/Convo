@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import API from '../../api/axios.js'
 import { toast } from 'react-toastify'
@@ -6,11 +6,14 @@ import { useNavigate } from 'react-router-dom'
 
 const Register = () => {
     const navigate = useNavigate()
+    const [showPassword, setShowPassword] = useState(false)
 
     const {
         register,
         handleSubmit,
         reset,
+        setValue,
+        watch,
         formState: { errors, isSubmitting }
     } = useForm({
         defaultValues: {
@@ -20,6 +23,10 @@ const Register = () => {
             password: '',
         }
     })
+
+    const nameValue = watch("name")
+    const usernameValue = watch("username")
+    const emailValue = watch("email")
 
     const onSubmit = async (data) => {
         try {
@@ -63,8 +70,8 @@ const Register = () => {
                     <p className="text-gray-400 text-sm mt-2">Please create an account to continue</p>
 
                     <div className="mt-6">
-                        <div className="flex items-center w-full bg-white/5 ring-2 ring-white/10 focus-within:ring-indigo-500/60 h-12 rounded-full overflow-hidden pl-6 gap-2 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/60" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <circle cx="12" cy="8" r="5" /> <path d="M20 21a8 8 0 0 0-16 0" /> </svg>
+                        <div className="flex items-center w-full bg-white/5 ring-2 ring-white/10 focus-within:ring-indigo-500/60 h-12 rounded-full overflow-hidden pl-6 pr-4 gap-2 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/60 shrink-0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <circle cx="12" cy="8" r="5" /> <path d="M20 21a8 8 0 0 0-16 0" /> </svg>
                             <input
                                 type="text"
                                 placeholder="Name"
@@ -74,6 +81,19 @@ const Register = () => {
                                     required: "Name is required"
                                 })}
                             />
+                            {nameValue && (
+                                <button
+                                    type="button"
+                                    onClick={() => setValue("name", "", { shouldValidate: true })}
+                                    className="text-white/50 hover:text-white transition cursor-pointer p-1 shrink-0"
+                                    title="Clear name"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18" />
+                                        <line x1="6" y1="6" x2="18" y2="18" />
+                                    </svg>
+                                </button>
+                            )}
                         </div>
                         {errors.name && (
                             <p className="text-red-400 text-xs text-left pl-4 mt-1">{errors.name.message}</p>
@@ -81,8 +101,8 @@ const Register = () => {
                     </div>
 
                     <div className="mt-4">
-                        <div className="flex items-center w-full bg-white/5 ring-2 ring-white/10 focus-within:ring-indigo-500/60 h-12 rounded-full overflow-hidden pl-6 gap-2 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/60" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /> <circle cx="12" cy="7" r="4" /> </svg>
+                        <div className="flex items-center w-full bg-white/5 ring-2 ring-white/10 focus-within:ring-indigo-500/60 h-12 rounded-full overflow-hidden pl-6 pr-4 gap-2 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/60 shrink-0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /> <circle cx="12" cy="7" r="4" /> </svg>
                             <input
                                 type="text"
                                 placeholder="Username"
@@ -92,6 +112,19 @@ const Register = () => {
                                     required: "Username is required"
                                 })}
                             />
+                            {usernameValue && (
+                                <button
+                                    type="button"
+                                    onClick={() => setValue("username", "", { shouldValidate: true })}
+                                    className="text-white/50 hover:text-white transition cursor-pointer p-1 shrink-0"
+                                    title="Clear username"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18" />
+                                        <line x1="6" y1="6" x2="18" y2="18" />
+                                    </svg>
+                                </button>
+                            )}
                         </div>
                         {errors.username && (
                             <p className="text-red-400 text-xs text-left pl-4 mt-1">{errors.username.message}</p>
@@ -99,8 +132,8 @@ const Register = () => {
                     </div>
 
                     <div className="mt-4">
-                        <div className="flex items-center w-full bg-white/5 ring-2 ring-white/10 focus-within:ring-indigo-500/60 h-12 rounded-full overflow-hidden pl-6 gap-2 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/60" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" /> <rect x="2" y="4" width="20" height="16" rx="2" /> </svg>
+                        <div className="flex items-center w-full bg-white/5 ring-2 ring-white/10 focus-within:ring-indigo-500/60 h-12 rounded-full overflow-hidden pl-6 pr-4 gap-2 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/60 shrink-0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" /> <rect x="2" y="4" width="20" height="16" rx="2" /> </svg>
                             <input
                                 type="email"
                                 placeholder="Email id"
@@ -114,6 +147,19 @@ const Register = () => {
                                     }
                                 })}
                             />
+                            {emailValue && (
+                                <button
+                                    type="button"
+                                    onClick={() => setValue("email", "", { shouldValidate: true })}
+                                    className="text-white/50 hover:text-white transition cursor-pointer p-1 shrink-0"
+                                    title="Clear email"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18" />
+                                        <line x1="6" y1="6" x2="18" y2="18" />
+                                    </svg>
+                                </button>
+                            )}
                         </div>
                         {errors.email && (
                             <p className="text-red-400 text-xs text-left pl-4 mt-1">{errors.email.message}</p>
@@ -121,10 +167,10 @@ const Register = () => {
                     </div>
 
                     <div className="mt-4">
-                        <div className="flex items-center w-full bg-white/5 ring-2 ring-white/10 focus-within:ring-indigo-500/60 h-12 rounded-full overflow-hidden pl-6 gap-2 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/60" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <rect width="18" height="11" x="3" y="11" rx="2" ry="2" /> <path d="M7 11V7a5 5 0 0 1 10 0v4" /> </svg>
+                        <div className="flex items-center w-full bg-white/5 ring-2 ring-white/10 focus-within:ring-indigo-500/60 h-12 rounded-full overflow-hidden pl-6 pr-4 gap-2 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/60 shrink-0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <rect width="18" height="11" x="3" y="11" rx="2" ry="2" /> <path d="M7 11V7a5 5 0 0 1 10 0v4" /> </svg>
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 placeholder="Password"
                                 autoComplete="new-password"
                                 className="w-full bg-transparent text-white placeholder-white/60 border-none outline-none"
@@ -136,6 +182,26 @@ const Register = () => {
                                     }
                                 })}
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(prev => !prev)}
+                                className="text-white/50 hover:text-white transition cursor-pointer p-1 shrink-0"
+                                title={showPassword ? "Hide password" : "Show password"}
+                            >
+                                {showPassword ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                                        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                                        <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                                        <line x1="2" y1="2" x2="22" y2="22" />
+                                    </svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" />
+                                        <circle cx="12" cy="12" r="3" />
+                                    </svg>
+                                )}
+                            </button>
                         </div>
                         {errors.password && (
                             <p className="text-red-400 text-xs text-left pl-4 mt-1">{errors.password.message}</p>

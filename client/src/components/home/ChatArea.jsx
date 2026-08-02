@@ -179,6 +179,19 @@ const ChatArea = ({ selectedContact, userData, socket, onMessageActivity, onBack
                             if (e.key === "Enter") handleSend();
                         }}
                     />
+                    {input && (
+                        <button
+                            type="button"
+                            onClick={() => setInput('')}
+                            className="text-white/50 hover:text-white transition cursor-pointer p-1 shrink-0"
+                            title="Clear message"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
+                    )}
                     <button
                         type="button"
                         className="bg-gradient-to-r from-pink-500 to-fuchsia-500 hover:from-pink-600 hover:to-fuchsia-600 text-white w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-md shadow-pink-500/30 transition cursor-pointer"

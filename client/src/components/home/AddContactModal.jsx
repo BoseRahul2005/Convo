@@ -86,6 +86,19 @@ const AddContactModal = ({
                             className="w-full bg-transparent text-white placeholder-white/60 border-none outline-none text-sm"
                             autoFocus
                         />
+                        {findUserQuery && (
+                            <button
+                                type="button"
+                                onClick={() => setFindUserQuery('')}
+                                className="text-white/50 hover:text-white transition cursor-pointer p-1 shrink-0"
+                                title="Clear search"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18" />
+                                    <line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                            </button>
+                        )}
                     </div>
                 </div>
 

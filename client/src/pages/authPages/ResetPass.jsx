@@ -6,12 +6,15 @@ import { toast } from 'react-toastify'
 
 const ResetPass = () => {
     const [isEmailSent, setIsEmailSent] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
     const navigate = useNavigate()
 
     const {
         register,
         handleSubmit,
         getValues,
+        setValue,
+        watch,
         formState: { errors, isSubmitting }
     } = useForm({
         defaultValues: {
@@ -20,6 +23,9 @@ const ResetPass = () => {
             newPassword: ''
         }
     })
+
+    const emailValue = watch("email")
+    const otpValue = watch("otp")
 
     const handleSendOtp = async (data) => {
         try {
@@ -90,8 +96,8 @@ const ResetPass = () => {
                     </p>
 
                     <div className="mt-6">
-                        <div className="flex items-center w-full bg-white/5 ring-2 ring-white/10 focus-within:ring-indigo-500/60 h-12 rounded-full overflow-hidden pl-6 gap-2 transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/60" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" /> <rect x="2" y="4" width="20" height="16" rx="2" /> </svg>
+                        <div className="flex items-center w-full bg-white/5 ring-2 ring-white/10 focus-within:ring-indigo-500/60 h-12 rounded-full overflow-hidden pl-6 pr-4 gap-2 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/60 shrink-0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" /> <rect x="2" y="4" width="20" height="16" rx="2" /> </svg>
                             <input
                                 type="email"
                                 placeholder="Email id"
@@ -106,6 +112,19 @@ const ResetPass = () => {
                                     }
                                 })}
                             />
+                            {emailValue && !isEmailSent && (
+                                <button
+                                    type="button"
+                                    onClick={() => setValue("email", "", { shouldValidate: true })}
+                                    className="text-white/50 hover:text-white transition cursor-pointer p-1 shrink-0"
+                                    title="Clear email"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18" />
+                                        <line x1="6" y1="6" x2="18" y2="18" />
+                                    </svg>
+                                </button>
+                            )}
                         </div>
                         {errors.email && (
                             <p className="text-red-400 text-xs text-left pl-4 mt-1">{errors.email.message}</p>
@@ -115,8 +134,8 @@ const ResetPass = () => {
                     {isEmailSent && (
                         <>
                             <div className="mt-4">
-                                <div className="flex items-center w-full bg-white/5 ring-2 ring-white/10 focus-within:ring-indigo-500/60 h-12 rounded-full overflow-hidden pl-6 gap-2 transition-all">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/60" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /> </svg>
+                                <div className="flex items-center w-full bg-white/5 ring-2 ring-white/10 focus-within:ring-indigo-500/60 h-12 rounded-full overflow-hidden pl-6 pr-4 gap-2 transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/60 shrink-0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /> </svg>
                                     <input
                                         type="text"
                                         placeholder="6-Digit OTP"
@@ -131,6 +150,19 @@ const ResetPass = () => {
                                             }
                                         })}
                                     />
+                                    {otpValue && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setValue("otp", "", { shouldValidate: true })}
+                                            className="text-white/50 hover:text-white transition cursor-pointer p-1 shrink-0"
+                                            title="Clear OTP"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <line x1="18" y1="6" x2="6" y2="18" />
+                                                <line x1="6" y1="6" x2="18" y2="18" />
+                                            </svg>
+                                        </button>
+                                    )}
                                 </div>
                                 {errors.otp && (
                                     <p className="text-red-400 text-xs text-left pl-4 mt-1">{errors.otp.message}</p>
@@ -138,10 +170,10 @@ const ResetPass = () => {
                             </div>
 
                             <div className="mt-4">
-                                <div className="flex items-center w-full bg-white/5 ring-2 ring-white/10 focus-within:ring-indigo-500/60 h-12 rounded-full overflow-hidden pl-6 gap-2 transition-all">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/60" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <rect width="18" height="11" x="3" y="11" rx="2" ry="2" /> <path d="M7 11V7a5 5 0 0 1 10 0v4" /> </svg>
+                                <div className="flex items-center w-full bg-white/5 ring-2 ring-white/10 focus-within:ring-indigo-500/60 h-12 rounded-full overflow-hidden pl-6 pr-4 gap-2 transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-white/60 shrink-0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <rect width="18" height="11" x="3" y="11" rx="2" ry="2" /> <path d="M7 11V7a5 5 0 0 1 10 0v4" /> </svg>
                                     <input
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         placeholder="New Password"
                                         autoComplete="new-password"
                                         className="w-full bg-transparent text-white placeholder-white/60 border-none outline-none"
@@ -153,6 +185,26 @@ const ResetPass = () => {
                                             }
                                         })}
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(prev => !prev)}
+                                        className="text-white/50 hover:text-white transition cursor-pointer p-1 shrink-0"
+                                        title={showPassword ? "Hide password" : "Show password"}
+                                    >
+                                        {showPassword ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                                                <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                                                <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                                                <line x1="2" y1="2" x2="22" y2="22" />
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                        )}
+                                    </button>
                                 </div>
                                 {errors.newPassword && (
                                     <p className="text-red-400 text-xs text-left pl-4 mt-1">{errors.newPassword.message}</p>
