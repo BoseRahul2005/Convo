@@ -1,7 +1,7 @@
 const User=require("../models/userModel");
 const bcrypt=require("bcryptjs");
 const jwt=require("jsonwebtoken");
-const transporter=require("../config/nodemailer.js");
+const resend=require("../config/nodemailer.js"); // now exports the Resend client instead of a Nodemailer transporter
 
 //for registering a new user
 exports.register=async (req, res) => {
@@ -10,17 +10,13 @@ exports.register=async (req, res) => {
         return res.json({success:false, message:"All fields are required"});
     }
 
-    //when we get all the fields, we will check if the user already exists or not
     try{
-        //checking if user already exists in the db by finding the user by email
         const existingUser = await User.findOne({ email });
         if(existingUser){
-            //if user already exists, we will return an error message
             return res.json({success:false, message:"User already exists"});
         }
-        const hashedPassword=bcrypt.hashSync(password, 10); //hashing the password before saving it to the database
+        const hashedPassword=bcrypt.hashSync(password, 10);
 
-        //if user doesn't exist, we will create a new user object and save it to the database
         const newUser=new User({
             username,
             name,
@@ -35,19 +31,20 @@ exports.register=async (req, res) => {
             httpOnly:true,
             secure:process.env.NODE_ENV==="production",
             sameSite:process.env.NODE_ENV==="production"?"none":"strict",
-            maxAge:7*24*60*60*1000, // 7 days
+            maxAge:7*24*60*60*1000,
         });
 
         res.json({success:true, message:"Registered successfully"});
-        // Send welcome email
-        const mailOptions = {
-            from: process.env.SENDER_MAIL,
+
+        // Send welcome email in the background
+        resend.emails.send({
+            from: `Convo <${process.env.SENDER_MAIL}>`,
             to: newUser.email,
             subject: "Welcome to Convo!",
             text: `Hello ${newUser.name},\n\nThank you for registering with us! We're excited to have you on board.\n\nWake up your Beast in the chat..`
-        };
-        await transporter.sendMail(mailOptions);
-
+        }).catch(err => {
+            console.log("Welcome email failed to send:", err.message);
+        });
 
     }catch(err){
         res.json({success:false, message:err.message});
@@ -55,7 +52,6 @@ exports.register=async (req, res) => {
 }
 
 exports.login=async (req, res) => {
-    console.log("NODE_ENV is:", process.env.NODE_ENV);
     const { email, password } = req.body;
     if(!email || !password){
         return res.json({success:false, message:"All fields are required"});
@@ -78,7 +74,7 @@ exports.login=async (req, res) => {
             httpOnly:true,
             secure:process.env.NODE_ENV==="production",
             sameSite:process.env.NODE_ENV==="production"?"none":"strict",
-            maxAge:7*24*60*60*1000, // 7 days
+            maxAge:7*24*60*60*1000,
         });
 
         res.json({success:true, message:"logged in successfully"});
@@ -102,26 +98,23 @@ exports.logout=async (req, res) => {
 
 exports.sendVerifyOtp=async (req, res) => {
     let { userId} = req.body;   
-    user=await User.findById(userId); //finding the user by id
+    user=await User.findById(userId);
 
-    //checking if the isAccountVerified is true or not, if it is true, we will return an error message
     if(user.isAccountVerified){
         return res.json({success:false, message:"Account is already verified"});
     }
 
     try{
-        let otp=Math.floor(100000 + Math.random() * 900000).toString(); //generating a random 6 digit value and converting it to string
-        user.verifyOtp=otp; //setting the otp to the verifyOtp field of the user object
-        user.verifyOtpExpireAt=Date.now()+10*60*1000; //setting the expiry time of the otp to 10 minutes from now
+        let otp=Math.floor(100000 + Math.random() * 900000).toString();
+        user.verifyOtp=otp;
+        user.verifyOtpExpireAt=Date.now()+10*60*1000;
 
-        //sending the otp to the user's email using nodemailer
-        let mailOption = {
-            from: process.env.SENDER_MAIL,
+        await resend.emails.send({
+            from: `Convo <${process.env.SENDER_MAIL}>`,
             to: user.email,
             subject: "Verify your email",
             text: `Hello ${user.name},\n\nYour verification code is: ${otp}\n\nThis code will expire in 10 minutes.`
-        };
-        await transporter.sendMail(mailOption);
+        });
         await user.save();
         res.json({success:true, message:"OTP sent successfully"});
 
@@ -145,18 +138,15 @@ exports.verifyEmail=async (req, res) => {
             return res.json({success:false, message:"User not found"});
         }
 
-        //checking if the otp field is not empty and is correct or not, if it is not correct, we will return an error message
         if(user.verifyOtp===''||user.verifyOtp!==otp){
             return res.json({success:false, message:"Invalid OTP"});
         }
 
-        //checking if the otp has expired or not, if it has expired, we will return an error message
         if(user.verifyOtpExpireAt<Date.now()){
             return res.json({success:false, message:"OTP expired"});
         }
         user.isAccountVerified=true;
 
-        //resetting the otp and expiry time to empty and 0 respectively after successful verification as it had as default values in the schema
         user.verifyOtp='';
         user.verifyOtpExpireAt=0;
         await user.save();
@@ -185,23 +175,23 @@ exports.resetPassOtp=async (req, res) => {
         if(!user){
             return res.json({success:false, message:"User not found"});
         }
-        let otp=Math.floor(100000 + Math.random() * 900000).toString(); //generating a random 6 digit value and converting it to string
-        user.resetOtp=otp; //setting the otp to the resetPassOtp field of the user object
-        user.resetOtpExpireAt=Date.now()+10*60*1000; //setting the expiry time of the otp to 10 minutes from now
+        let otp=Math.floor(100000 + Math.random() * 900000).toString();
+        user.resetOtp=otp;
+        user.resetOtpExpireAt=Date.now()+10*60*1000;
         
-        let mailOption = {
-            from: process.env.SENDER_MAIL,
+        await resend.emails.send({
+            from: `Convo <${process.env.SENDER_MAIL}>`,
             to: user.email,
             subject: "Reset your password",
             text: `Hello ${user.name},we are human and we can forget things\nDon't worry\nwe got you,\n\nYour password reset code is: ${otp}\n\nThis code will expire in 10 minutes.`
-        };
-        await transporter.sendMail(mailOption);
+        });
         await user.save();
         res.json({success:true, message:"OTP sent to your email successfully"});
     }catch(err){
         res.json({success:false, message:err.message});
     }
 }
+
 exports.resetPassword=async (req, res) => {
     let {email, otp, newPassword} = req.body;
     if(!email || !otp || !newPassword){
@@ -219,7 +209,7 @@ exports.resetPassword=async (req, res) => {
         if(user.resetOtpExpireAt<Date.now()){
             return res.json({success:false, message:"OTP expired"});
         }
-        const hashedPassword=bcrypt.hashSync(newPassword, 10); //hashing the new password before saving it to the database
+        const hashedPassword=bcrypt.hashSync(newPassword, 10);
         user.password=hashedPassword;
         user.resetOtp='';
         user.resetOtpExpireAt=0;
