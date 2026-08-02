@@ -5,5 +5,6 @@ const userAuth = require("../middlewares/userAuth.js");
 
 messageRouter.post("/send-message/:receiverId", userAuth, messageController.sendMessage);
 messageRouter.get("/all-messages/:contactId",userAuth,messageController.allMessages);
+messageRouter.put("/mark-seen/:contactId",userAuth,messageController.seenMessage);
 
 module.exports = messageRouter;

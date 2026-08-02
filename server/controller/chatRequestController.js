@@ -1,4 +1,5 @@
 const ChatRequest = require("../models/chatRequestModel.js");
+const Message = require("../models/messageModel.js");
 const { getSocketIdByUserId, getIO } = require("../config/socket.js")
 
 exports.sendRequest = async (req, res) => {
@@ -138,18 +139,32 @@ exports.getContacts = async (req, res) => {
             ]
         }).populate("sender receiver", "username name _id email");
 
-        const contacts = acceptedRequest.map(request => {
+        const contacts = await Promise.all(
+        acceptedRequest.map(async (request) => {
             const isSender = request.sender._id.toString() === loggedInUser;
             const otherUser = isSender ? request.receiver : request.sender;
 
+            const lastMessage = await Message.findOne({
+                $or:[{sender:loggedInUser, receiver:otherUser._id},{sender:otherUser._id, receiver:loggedInUser}]
+            }).sort({createdAt: -1});
+
+            const unreadCount = await Message.countDocuments({
+                sender:otherUser._id,
+                receiver:loggedInUser,
+                seen:false
+            });
+            
             return {
                 _id: request._id,
                 contactId: otherUser._id,
                 name: otherUser.name,
                 username: otherUser.username,
-                email: otherUser.email
+                email: otherUser.email,
+                lastMessage: lastMessage? lastMessage.text: null,
+                lastMessageTime: lastMessage? lastMessage.createdAt : null,
+                unreadCount
             };
-        })
+        }))
 
         res.json({ success: true, contacts });
     }

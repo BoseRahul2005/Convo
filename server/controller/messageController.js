@@ -52,3 +52,24 @@ exports.allMessages= async(req,res)=>{
         res.json({success:false,message:err.message});
     }
 }
+
+exports.seenMessage= async(req,res)=>{
+    const loggedInUser=req.userId;
+    const {contactId}=req.params;
+    try{
+        if(!contactId){
+           return res.json({success:false,message:"Contact id required"});
+        }
+        const updateMessage= await Message.updateMany({
+            seen:false,
+            sender:contactId,
+            receiver:loggedInUser
+        },{
+            $set:{seen:true}
+        })
+        res.json({success:true,updateMessage});
+    }catch(err){
+        console.log(err);
+        res.json({success:false,message:err.message});
+    }
+}

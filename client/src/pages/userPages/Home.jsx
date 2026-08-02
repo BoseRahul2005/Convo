@@ -114,6 +114,8 @@ const Home = () => {
             selectedContact={selectedContact} 
             userData={userData} 
             socket={socket}
+            onMessageActivity={()=>fetchContacts(setContacts)}
+            onBack={() => setSelectedContact(null)}
             />
 
             {/* Chat Requests Modal Card */}

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import fetchMessages from '../../utils/fetchMessages.js';
 import sendMessage from '../../utils/sendMessage.js';
+import markSeen from '../../utils/MarkSeen.js';
 
-const ChatArea = ({ selectedContact, userData, socket }) => {
+const ChatArea = ({ selectedContact, userData, socket, onMessageActivity, onBack }) => {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const messagesEndRef = useRef(null);
@@ -13,6 +14,7 @@ const ChatArea = ({ selectedContact, userData, socket }) => {
             if (message.success) {
                 setMessages((prev) => [...prev, message.newMessage]);
                 setInput('');
+                onMessageActivity();
             }
         }
     }
@@ -26,6 +28,10 @@ const ChatArea = ({ selectedContact, userData, socket }) => {
         if (selectedContact) {
             setMessages([]); // clear old messages first
             fetchMessages(selectedContact.contactId, setMessages);
+            markSeen(selectedContact.contactId).then(() => {
+                onMessageActivity();
+            })
+
         }
     }, [selectedContact]);
 
@@ -37,6 +43,7 @@ const ChatArea = ({ selectedContact, userData, socket }) => {
             if (isFromCurrentContact) {
                 setMessages(prev => [...prev, newMessage])
             }
+            onMessageActivity();
         }
 
         socket.on("new_message", handleNewMessage);
@@ -51,7 +58,7 @@ const ChatArea = ({ selectedContact, userData, socket }) => {
 
     if (!selectedContact) {
         return (
-            <div className="flex-1 bg-white/6 border border-white/10 rounded-2xl flex flex-col items-center justify-center p-6 backdrop-blur-md shadow-2xl relative overflow-hidden">
+            <div className="flex-1 bg-white/6 border border-white/10 rounded-2xl flex-col items-center justify-center p-6 backdrop-blur-md shadow-2xl relative overflow-hidden hidden min-[1000px]:flex">
                 {/* Centered Chat Placeholder */}
                 <div className="flex flex-col items-center text-center max-w-sm px-4">
                     <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-5 text-white/80 shadow-inner">
@@ -71,10 +78,21 @@ const ChatArea = ({ selectedContact, userData, socket }) => {
     }
 
     return (
-        <div className="flex-1 bg-white/6 border border-white/10 rounded-2xl flex flex-col backdrop-blur-md shadow-2xl relative overflow-hidden">
+        <div className="flex-1 bg-white/6 border border-white/10 rounded-2xl flex flex-col backdrop-blur-md shadow-2xl relative overflow-hidden w-full min-[1000px]:w-auto">
             {/* Header Bar */}
             <div className="p-4 border-b border-white/10 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3 min-w-0">
+                    <button
+                        type="button"
+                        title="Back to contacts"
+                        onClick={onBack}
+                        className="p-2 text-gray-400 hover:text-white transition cursor-pointer rounded-xl hover:bg-white/10 shrink-0 min-[1000px]:hidden"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M19 12H5" />
+                            <path d="M12 19l-7-7 7-7" />
+                        </svg>
+                    </button>
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-fuchsia-500 text-white text-sm font-bold flex items-center justify-center shrink-0 shadow-md">
                         {(selectedContact.username || selectedContact.name || 'U').charAt(0).toUpperCase()}
                     </div>
@@ -117,7 +135,7 @@ const ChatArea = ({ selectedContact, userData, socket }) => {
                                         )
                                     }
                                     <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
-                                        <div className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${isOwnMessage
+                                        <div className={`max-w-xs px-4 py-2 rounded-2xl text-sm break-words ${isOwnMessage
                                             ? 'bg-gradient-to-r from-pink-500 to-fuchsia-500 text-white rounded-2xl rounded-br-md'
                                             : 'bg-white/10 text-white rounded-2xl rounded-bl-md'
                                             }`}>
