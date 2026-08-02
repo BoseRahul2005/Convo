@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import fetchMessages from '../../utils/fetchMessages.js';
 import sendMessage from '../../utils/sendMessage.js';
 
 const ChatArea = ({ selectedContact, userData, socket }) => {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
+    const messagesEndRef = useRef(null);
 
     const handleSend = async () => {
         if (input.trim()) {
@@ -16,6 +17,11 @@ const ChatArea = ({ selectedContact, userData, socket }) => {
         }
     }
 
+    const formatDateLabel = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: "short", day: "numeric", year: "numeric" }).toUpperCase();
+    }
+
     useEffect(() => {
         if (selectedContact) {
             setMessages([]); // clear old messages first
@@ -23,21 +29,25 @@ const ChatArea = ({ selectedContact, userData, socket }) => {
         }
     }, [selectedContact]);
 
-    useEffect(()=>{
-        if(!socket||!selectedContact) return;
+    useEffect(() => {
+        if (!socket || !selectedContact) return;
 
-        const handleNewMessage = (newMessage)=>{
-            const isFromCurrentContact= (newMessage.sender._id || newMessage.sender) === selectedContact.contactId
-            if(isFromCurrentContact){
-                setMessages(prev=>[...prev,newMessage])
+        const handleNewMessage = (newMessage) => {
+            const isFromCurrentContact = (newMessage.sender._id || newMessage.sender) === selectedContact.contactId
+            if (isFromCurrentContact) {
+                setMessages(prev => [...prev, newMessage])
             }
         }
 
-        socket.on("new_message",handleNewMessage);
-        return()=>{
-            socket.off("new_message",handleNewMessage);
+        socket.on("new_message", handleNewMessage);
+        return () => {
+            socket.off("new_message", handleNewMessage);
         }
-    },[socket,selectedContact])
+    }, [socket, selectedContact])
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages]);
 
     if (!selectedContact) {
         return (
@@ -85,24 +95,46 @@ const ChatArea = ({ selectedContact, userData, socket }) => {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 flex flex-col justify-end p-4 gap-2 overflow-y-auto">
+            <div className="flex-1 p-4 overflow-y-auto no-scrollbar [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {messages.length > 0 ? (
-                    messages.map((message) => {
-                        const isOwnMessage = (message.sender?._id || message.sender) === userData?._id;
-                        return (
-                            <div key={message._id} className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${isOwnMessage
-                                    ? 'bg-gradient-to-r from-pink-500 to-fuchsia-500 text-white rounded-2xl rounded-br-md'
-                                    : 'bg-white/10 text-white rounded-2xl rounded-bl-md'
-                                    }`}>
-                                    {message.text}
-                                </div>
-                            </div>
-                        )
-                    })
+                    <div className="flex flex-col justify-end min-h-full gap-2">
+                        {messages.map((message, index) => {
+                            const isOwnMessage = (message.sender?._id || message.sender) === userData?._id;
+                            const time = new Date(message.createdAt).toLocaleTimeString([], { hour12: true, hour: 'numeric', minute: '2-digit' });
+
+                            const currentDate = new Date(message.createdAt).toDateString();
+                            const prevDate = index > 0 ? new Date(messages[index - 1].createdAt).toDateString() : null;
+                            const showDateSeperator = currentDate !== prevDate;
+                            return (
+                                <React.Fragment key={message._id || index}>
+                                    {
+                                        showDateSeperator && (
+                                            <div className="flex justify-center my-2">
+                                                <span className="bg-white/10 text-gray-300 text-xs font-medium px-3 py-1 rounded-full">
+                                                    {formatDateLabel(message.createdAt)}
+                                                </span>
+                                            </div>
+                                        )
+                                    }
+                                    <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
+                                        <div className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${isOwnMessage
+                                            ? 'bg-gradient-to-r from-pink-500 to-fuchsia-500 text-white rounded-2xl rounded-br-md'
+                                            : 'bg-white/10 text-white rounded-2xl rounded-bl-md'
+                                            }`}>
+                                            <p>{message.text}</p>
+                                            <p className={`text-[10px] mt-1 ${isOwnMessage ? 'text-white/70 text-right' : 'text-gray-400 text-left'}`}>
+                                                {time}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </React.Fragment>
+                            )
+                        })}
+                        <div ref={messagesEndRef} />
+                    </div>
                 ) : (
                     /* Empty Messages Area */
-                    <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                    <div className="h-full flex flex-col items-center justify-center p-6 text-center">
                         <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-white/80 shadow-inner">
                             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                                 <line x1="22" y1="2" x2="11" y2="13" />
